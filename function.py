@@ -174,3 +174,37 @@ def heatmap():
     corr_df = combined.corr()
 #display dataframe
     display(sns.heatmap(corr_df, cmap='coolwarm', annot=True))
+
+def calc_exchange_ratio():
+    coin1 = read_and_clean_1()
+    coin2 = read_and_clean_1()
+    exchange_df = pd.merge(coin1,coin2, on='time',suffixes=('_1','_2'))                           
+    exchange_df['exchange_rate'] = exchange_df['price_1']/exchange_df['price_2']
+    #print(exchange_df.head(5)) 
+    exchange_df.plot(x='time', y='exchange_rate')
+    plt.show()
+
+def graph_trading_volumes():
+    coin1 = read_and_clean_1()
+    coin2 = read_and_clean_1()
+    merged_df =  pd.merge(coin1,coin2, on='time',suffixes=('_1','_2'))    
+    plt.plot(merged_df['time'], merged_df['total_volume_1'])
+    plt.plot(merged_df['time'], merged_df['total_volume_2'])
+    plt.xlabel('Time')
+    plt.ylabel('Total Trade Volume')
+    plt.title('Trade Volume Over Time')
+    plt.legend()
+    plt.show()
+
+def graph_market_cap():
+    coin1 = read_and_clean_1()
+    coin2 = read_and_clean_1()
+    merged_df =  pd.merge(coin1,coin2, on='time',suffixes=('_1','_2'))    
+    plt.plot(merged_df['time'], merged_df['market_cap_1'])
+    plt.plot(merged_df['time'], merged_df['market_cap_2'])
+    plt.xlabel('Time')
+    plt.ylabel('Market Cap')
+    plt.title('Market Cap Over Time')
+    plt.yscale('log')  # Set y-axis to log scale
+    plt.legend()
+    plt.show()
