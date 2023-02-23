@@ -13,9 +13,10 @@ import seaborn as sns
 client = CoinGeckoAPI()
 client.ping()
 
+x = 0
 
 
-def read_and_clean_1():
+def read_and_clean_1(start,end,coin):
     # Helper Functions
     def unix_time(year, month, day, hour, second):
         date_time = datetime.datetime(year, month, day, hour, second)
@@ -23,16 +24,12 @@ def read_and_clean_1():
 
     def human_time(unix_time):
         return datetime.datetime.fromtimestamp(unix_time)
-    
-    start = unix_time(2018, 1, 1, 0, 0)
-    end = unix_time(2023, 1, 1, 0, 0)
-    
-    coin1 = input("What is a coin you would like to compare")
-    coin1 = coin1.lower()
+
+
    
     # Reading in specified dates from API
     user_coin1 = client.get_coin_market_chart_range_by_id(
-    id = coin1,
+    id = coin,
     vs_currency = 'usd',
     from_timestamp=start,
     to_timestamp=end)
@@ -53,13 +50,12 @@ def read_and_clean_1():
     coin1_df.drop('time2', axis=1, inplace=True)
     coin1_df.drop('time3', axis=1, inplace=True)
     
-    coin1_df['time'] = pd.to_datetime(coin1_df['time'], unit='ms')
-    
+    coin1_df['time'] = pd.to_datetime(coin1_df['time'], unit='ms')   
     return coin1_df
 
 
-def monte_carlo():
-    coin1_df = read_and_clean_1()
+def monte_carlo(start,end,coin):
+    coin1_df = read_and_clean_1(start,end,coin)
     returns = coin1_df["price"].pct_change()
     last_price =coin1_df["price"].iloc[-1]
     number_simulations = 1000
@@ -82,7 +78,6 @@ def monte_carlo():
             count +=1
         simulation_df[x] = price_series
     
-    
     fig = plt.figure(figsize=(15,9))
     plt.plot(simulation_df)
     plt.axhline(y = last_price, color = 'r', linestyle = '-')
@@ -91,46 +86,14 @@ def monte_carlo():
     plt.ylabel('Price - USD')
     plt.show()
     
-def monte_carlo2():
-    coin2_df = read_and_clean_1()
-    returns = coin2_df["price"].pct_change()
-    last_price =coin2_df["price"].iloc[-1]
-    number_simulations = 1000
-    number_days = 159
-    simulation_df = pd.DataFrame()
-    for x in range(number_simulations):
-        count = 0
-        daily_volatility = returns.std()
-        
-        price_series = []
-        
-        price = last_price * (1 + np.random.normal(0, daily_volatility))
-        price_series.append(price)
-            
-        for y in range(number_days):
-            if count == 158:
-                break
-            price = price_series[count] * (1 + np.random.normal(0, daily_volatility))
-            price_series.append(price)
-            count +=1
-        simulation_df[x] = price_series
-    
-    
-    fig = plt.figure(figsize=(15,9))
-    plt.plot(simulation_df)
-    plt.axhline(y = last_price, color = 'r', linestyle = '-')
-    plt.title("Monte Carlo Simulation ",  fontsize = 34)
-    plt.xlabel('Day')
-    plt.ylabel('Price - USD')
-    plt.show()
-    
-def sharpe_ratio():
+
+def sharpe_ratio(start,end,coin1,coin2,coin3,coin4,coin5):
    # Getting input for specific coins/ dates
-    coin1_df = read_and_clean_1()
-    coin2_df = read_and_clean_1()
-    coin3_df = read_and_clean_1()
-    coin4_df = read_and_clean_1()
-    coin5_df  = read_and_clean_1()
+    coin1_df = read_and_clean_1(start,end,coin1)
+    coin2_df = read_and_clean_1(start,end,coin2)
+    coin3_df = read_and_clean_1(start,end,coin3)
+    coin4_df = read_and_clean_1(start,end,coin4)
+    coin5_df  = read_and_clean_1(start,end,coin5)
     
     # cleaning continued
     coin1_df = coin1_df.set_index('time')
@@ -157,9 +120,9 @@ def sharpe_ratio():
     
     print(sharpe_plot)
 
-def heatmap():
-    coin1_df = read_and_clean_1()
-    coin2_df = read_and_clean_1()
+def heatmap(start,end,coin1,coin2):
+    coin1_df = read_and_clean_1(start,end,coin1)
+    coin2_df = read_and_clean_1(start,end,coin2)
     
     combined = pd.merge(coin1_df.rename(columns={'price': ' price', 
                                                   'market_cap' : ' market caps',
@@ -175,18 +138,18 @@ def heatmap():
 #display dataframe
     display(sns.heatmap(corr_df, cmap='coolwarm', annot=True))
 
-def calc_exchange_ratio():
-    coin1 = read_and_clean_1()
-    coin2 = read_and_clean_1()
+def calc_exchange_ratio(start,end,coin1,coin2):
+    coin1 = read_and_clean_1(start,end,coin1)
+    coin2 = read_and_clean_1(start,end,coin2)
     exchange_df = pd.merge(coin1,coin2, on='time',suffixes=('_1','_2'))                           
     exchange_df['exchange_rate'] = exchange_df['price_1']/exchange_df['price_2']
     #print(exchange_df.head(5)) 
     exchange_df.plot(x='time', y='exchange_rate')
     plt.show()
 
-def graph_trading_volumes():
-    coin1 = read_and_clean_1()
-    coin2 = read_and_clean_1()
+def graph_trading_volumes(start,end,coin1,coin2):
+    coin1 = read_and_clean_1(start,end,coin1)
+    coin2 = read_and_clean_1(start,end,coin2)
     merged_df =  pd.merge(coin1,coin2, on='time',suffixes=('_1','_2'))    
     plt.plot(merged_df['time'], merged_df['total_volume_1'])
     plt.plot(merged_df['time'], merged_df['total_volume_2'])
@@ -196,9 +159,9 @@ def graph_trading_volumes():
     plt.legend()
     plt.show()
 
-def graph_market_cap():
-    coin1 = read_and_clean_1()
-    coin2 = read_and_clean_1()
+def graph_market_cap(start,end,coin1,coin2):
+    coin1 = read_and_clean_1(start,end,coin1)
+    coin2 = read_and_clean_1(start,end,coin2)
     merged_df =  pd.merge(coin1,coin2, on='time',suffixes=('_1','_2'))    
     plt.plot(merged_df['time'], merged_df['market_cap_1'])
     plt.plot(merged_df['time'], merged_df['market_cap_2'])
