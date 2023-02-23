@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib import style
 from pathlib import Path
 import seaborn as sns
+import hvplot.pandas
 #%matplotlib inline
 # initilize client
 client = CoinGeckoAPI()
@@ -124,13 +125,13 @@ def heatmap(start,end,coin1,coin2):
     coin1_df = read_and_clean_1(start,end,coin1)
     coin2_df = read_and_clean_1(start,end,coin2)
     
-    combined = pd.merge(coin1_df.rename(columns={'price': ' price', 
-                                                  'market_cap' : ' market caps',
-                                                  'total_volume' : ' total volumes'
+    combined = pd.merge(coin1_df.rename(columns={'price': coin1 + ' price', 
+                                                  'market_cap' : coin1 + ' market caps',
+                                                  'total_volume' : coin1 + ' total volumes'
                                                  }),
-                        coin2_df.rename(columns={'price': ' price', 
-                                                  'market_cap' : ' market caps',
-                                                  'total_volume' : ' total volumes'
+                        coin2_df.rename(columns={'price': coin2 + ' price', 
+                                                  'market_cap' : coin2 +' market caps',
+                                                  'total_volume' : coin2 + ' total volumes'
                                                  }),
                         on='time')
 #Apply correlation method over df
@@ -160,14 +161,29 @@ def graph_trading_volumes(start,end,coin1,coin2):
     plt.show()
 
 def graph_market_cap(start,end,coin1,coin2):
-    coin1 = read_and_clean_1(start,end,coin1)
-    coin2 = read_and_clean_1(start,end,coin2)
-    merged_df =  pd.merge(coin1,coin2, on='time',suffixes=('_1','_2'))    
-    plt.plot(merged_df['time'], merged_df['market_cap_1'])
-    plt.plot(merged_df['time'], merged_df['market_cap_2'])
-    plt.xlabel('Time')
-    plt.ylabel('Market Cap')
-    plt.title('Market Cap Over Time')
-    plt.yscale('log')  # Set y-axis to log scale
-    plt.legend()
-    plt.show()
+    coin1_df = read_and_clean_1(start,end,coin1)
+    coin2_df = read_and_clean_1(start,end,coin2)
+    coin1_df = coin1_df.drop(columns=['market_cap', 'total_volume'])
+    coin2_df = coin2_df.drop(columns=['market_cap', 'total_volume'])
+    merge_df = pd.merge(coin1_df.rename(columns={'price' : coin1 + ' price', 
+                                                 }),
+                        coin2_df.rename(columns={'price' : coin2 + ' price', 
+                                                 }),
+                        on='time')
+    display(merge_df.hvplot.line(x='time', 
+                        title = 'Price over Time',
+                       logy=True,
+                        height=600,
+                        width=1200,
+                        use_index=False,
+                       ).opts(yformatter='%.0f'))
+    
+    #merged_df =  pd.merge(coin1,coin2, on='time',suffixes=('_1','_2'))    
+    #plt.plot(merged_df['time'], merged_df['market_cap_1'])
+    #plt.plot(merged_df['time'], merged_df['market_cap_2'])
+    #plt.xlabel('Time')
+    #plt.ylabel('Market Cap')
+    #plt.title('Market Cap Over Time')
+   # plt.yscale('log')  # Set y-axis to log scale
+   #plt.legend()
+   # plt.show()
