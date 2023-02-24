@@ -201,12 +201,4 @@ def graph_market_cap(start,end,coin1,coin2):
                         use_index=False,
                        ).opts(yformatter='%.0f'))
     
-    #merged_df =  pd.merge(coin1,coin2, on='time',suffixes=('_1','_2'))    
-    #plt.plot(merged_df['time'], merged_df['market_cap_1'])
-    #plt.plot(merged_df['time'], merged_df['market_cap_2'])
-    #plt.xlabel('Time')
-    #plt.ylabel('Market Cap')
-    #plt.title('Market Cap Over Time')
-   # plt.yscale('log')  # Set y-axis to log scale
-   #plt.legend()
-   # plt.show()
+   
